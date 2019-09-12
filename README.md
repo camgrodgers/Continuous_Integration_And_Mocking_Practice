@@ -76,3 +76,39 @@ I now see that there's a definite advantage to TDD. It is less haphazard than ke
 For personal projects, I'm now convinced that I should use tests very early on, but I'm not convinced that purely dogmatic TDD (always write a failing test first) is always necessary.
 
 ### Naming And Organization
+
+Because this is a simple project, I kept everything in the main file.
+I separated the functions and their associated types and tests using comments. E.G.:
+```
+// BMI Calculation
+#[derive(Debug)]
+enum bmi {
+    UnderWeight(f64),
+	// ...
+    Obese(f64),
+}
+
+fn calc_bmi(height_feet: f64, height_inches: f64, weight_pounds: f64) -> Result<bmi, String> {
+    let height_inches = height_inches + (height_feet * 12.0);
+    // ...
+        _ => Ok(bmi::Obese(bmi)),
+    }
+}
+
+#[test]
+fn bmi_does_not_crash() {
+    calc_bmi(1.0, 1.0, 1.0);
+}
+// ...
+
+// Retirement savings
+enum Age {
+// ...
+```
+I prefaced each test function name with the name of the function it was associated with.
+Tests for the retirement function are prefaced with "retirement" and so on. 
+For general naming conventions, I followed the Rust guidelines:
+
+https://rust-lang-nursery.github.io/api-guidelines/naming.html
+
+

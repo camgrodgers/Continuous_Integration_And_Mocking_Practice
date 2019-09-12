@@ -3,7 +3,6 @@ Code:
 	- if time's available, try out property testing
 
 Report:
-	- discuss naming and organization conventions
 
 Screencasts:
 	- edit the RGR videos down to a 2 minute clip
