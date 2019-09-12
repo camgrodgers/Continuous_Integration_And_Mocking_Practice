@@ -1,10 +1,11 @@
 extern crate regex;
 extern crate clap;
+#[macro_use]
 extern crate assert_approx_eq;
-use assert_approx_eq::assert_approx_eq;
+//use assert_approx_eq::assert_approx_eq;
 use regex::Regex;
 use clap::{App, Arg};
-use std::io::{self, Read};
+use std::io::{self};
 use std::str::FromStr;
 
 fn main() {
@@ -135,7 +136,7 @@ fn calc_bmi(height_feet: f64, height_inches: f64, weight_pounds: f64) -> Result<
 
 #[test]
 fn bmi_does_not_crash() {
-    calc_bmi(1.0, 1.0, 1.0);
+    calc_bmi(1.0, 1.0, 1.0).unwrap();
 }
 
 #[test]
