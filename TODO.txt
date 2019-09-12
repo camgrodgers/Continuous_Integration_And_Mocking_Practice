@@ -1,12 +1,7 @@
 Code:
-	- get test coverage level
 	- if time's available, try out property testing
 
 Report:
 
 Screencasts:
-	- edit the RGR videos down to a 2 minute clip
-	- edit video of running all the functions (via CLI or whatever) 4 times each
-
-
 
