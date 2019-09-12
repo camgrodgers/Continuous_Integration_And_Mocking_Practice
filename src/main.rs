@@ -1,6 +1,113 @@
+extern crate regex;
+extern crate clap;
+extern crate assert_approx_eq;
+use assert_approx_eq::assert_approx_eq;
+use regex::Regex;
+use clap::{App, Arg};
+use std::io::{self, Read};
+use std::str::FromStr;
 
 fn main() {
-    println!("Hello, world!");
+    let matches = App::new("TDD_Practice")
+        .arg(Arg::with_name("bodymass")
+             .long("bodymass")
+             .takes_value(false)
+             .help("Run the BMI input/calculation routine"))
+        .arg(Arg::with_name("distance")
+             .long("distance")
+             .takes_value(false)
+             .help("Run the distance input/calculation routine"))
+        .arg(Arg::with_name("retirement")
+             .long("retirement")
+             .takes_value(false)
+             .help("Run the retirement savings routine"))
+        .arg(Arg::with_name("email")
+             .long("email")
+             .takes_value(false)
+             .help("Run the email checking routine"))
+        .get_matches();
+
+    // These are ugly because I'm in a rush
+    if matches.is_present("bodymass") {
+        println!("Please enter your height in feet (not including inches):");
+        let mut height_ft = String::new();
+        io::stdin().read_line(&mut height_ft).unwrap();
+        println!("Please enter your height in inches (not including feet):");
+        let mut height_in = String::new();
+        io::stdin().read_line(&mut height_in).unwrap();
+        println!("Please enter your weight in pounds:");
+        let mut weight = String::new();
+        io::stdin().read_line(&mut weight).unwrap();
+        let height_ft = f64::from_str(height_ft.trim()).unwrap();
+        let height_in = f64::from_str(height_in.trim()).unwrap();
+        let weight = f64::from_str(weight.trim()).unwrap();
+        let bmi_val = match calc_bmi(height_ft, height_in, weight) {
+            Ok(val) => val,
+            Err(_) => { println!("invalid inputs"); return; },
+        };
+        print!("You are ");
+        match bmi_val {
+            bmi::UnderWeight(x) => println!("underweight with a BMI of {}.",x),
+            bmi::NormalWeight(x) => println!("normal with a BMI of {}.",x),
+            bmi::OverWeight(x) => println!("over weight with a BMI of {}.",x),
+            bmi::Obese(x) => println!("obese with a BMI of {}.",x),
+        }
+    }
+             
+    if matches.is_present("distance") {
+        let mut x = String::new();
+        let mut y = String::new();
+        println!("Please enter the x coordinate of point 1:");
+        io::stdin().read_line(&mut x).unwrap();
+        println!("Please enter the x coordinate of point 1:");
+        io::stdin().read_line(&mut y).unwrap();
+        x = String::from(x.trim());
+        y = String::from(y.trim());
+        let point_1 = Point{x: f64::from_str(&x).unwrap(), y: f64::from_str(&y).unwrap()};
+        println!("Please enter the x coordinate of point 2:");
+        x = "".to_string(); y = "".to_string();
+        io::stdin().read_line(&mut x).unwrap();
+        println!("Please enter the x coordinate of point 2:");
+        io::stdin().read_line(&mut y).unwrap();
+        x = String::from(x.trim());
+        y = String::from(y.trim());
+        let point_2 = Point{x: f64::from_str(&x).unwrap(), y: f64::from_str(&y).unwrap()};
+        println!("The distance between point 1 and 2 is: {}", 
+                 calc_shortest_distance(point_1, point_2));
+    }
+
+    if matches.is_present("retirement") {
+        println!("Please enter your current age in years:");
+        let mut age = String::new();
+        io::stdin().read_line(&mut age).unwrap();
+        let age = u8::from_str(age.trim()).unwrap();
+        println!("Please enter your annual salary:");
+        let mut salary = String::new();
+        io::stdin().read_line(&mut salary).unwrap();
+        let salary = f64::from_str(salary.trim()).unwrap();
+        println!("Please enter your savings rate:");
+        let mut rate = String::new();
+        io::stdin().read_line(&mut rate).unwrap();
+        let rate = f64::from_str(rate.trim()).unwrap();
+        println!("Please enter your savings goal:");
+        let mut goal = String::new();
+        io::stdin().read_line(&mut goal).unwrap();
+        let goal = f64::from_str(goal.trim()).unwrap();
+        match calc_retirement(age, salary, rate, goal) {
+            Age::Dead => println!("You'll die before you finish saving up."),
+            Age::Alive(age_fin) => println!("You'll be {} years old when you finish saving.", age_fin),
+        }
+    }
+
+    if matches.is_present("email") {
+        println!("Please enter an email address for validation:");
+        let mut email = String::new();
+        io::stdin().read_line(&mut email).unwrap();
+        match email_is_valid(String::from(email.trim())) {
+            true => println!("That email is valid!"),
+            false => println!("That email is invalid."),
+        }
+    }
 }
 
 // BMI Calculation
@@ -56,6 +163,13 @@ fn bmi_returns_correct_enum() {
     }
 }
 
+#[test]
+fn bmi_returns_correct_value() {
+    match calc_bmi(6.0, 0.0, 300.0).unwrap() {
+        bmi::Obese(bmi) => assert_approx_eq!(bmi, 41.66666, 0.001),
+        _ => panic!(),
+    }
+}
 
 // Retirement savings
 enum Age {
@@ -90,7 +204,6 @@ fn retirement_returns_dead() {
 #[test]
 fn retirement_returns_correct_value() {
     if let Age::Alive(x) = calc_retirement(20, 100_000.0, 0.01, 5000.0) {
-        println!("{}", x);
         assert_eq!(x, 23);
     }
 }
@@ -121,26 +234,39 @@ fn distance_horizontal() {
 #[test]
 fn distance_diagonal() {
     let result = calc_shortest_distance(Point{x: 1.5, y: 1.0}, Point{x: 4.0, y: 3.0});
-    if result > 3.202 || result < 3.200 {
-        panic!();
-    }
+    assert_approx_eq!(result, 3.20156, 0.0001)
 }
 
+// Email validation
+fn email_is_valid(email: String) -> bool {
+    Regex::new(
+        r"^[^\d\.][\w\d\.!${+%*-=?^_}|]+\w@[\w\.]+\.\w{1,4}$"
+        ).unwrap().is_match(&email)
+    & !email.contains("..")
+}
 
+#[test]
+fn email_accepts_valid() {
+    assert_eq!(true, email_is_valid(String::from("annie.!%*-=?^_}|${+1@mail.gmail.com")));
+    assert_eq!(true, email_is_valid(String::from("annie@gmail.com")));
+}
 
+#[test]
+fn email_rejects_garbage() {
+    assert_eq!(false, email_is_valid(String::from("erioggmdsm.v.vr..[[\\(")));
+}
 
+#[test]
+fn email_rejects_double_period() {
+    assert_eq!(false, email_is_valid(String::from("ann..ie@gmail.com")));
+}
 
+#[test]
+fn email_rejects_numeric_first_char() {
+    assert_eq!(false, email_is_valid(String::from("1annie@gmail.com")));
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+#[test]
+fn email_rejects_period_first_char() {
+    assert_eq!(false, email_is_valid(String::from(".annie@gmail.com")));
+}
