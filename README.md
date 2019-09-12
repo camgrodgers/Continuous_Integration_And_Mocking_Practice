@@ -65,21 +65,14 @@ There is 100% test coverage on all of the functions except for (possibly) the em
 The email validator is covered on both "code paths," but the regex portion of the function would require much more intensive testing for full coverage.
 I was unable to find and install a suitable code coverage tester for Rust at this time.
 
-### Installing
+#### My Experience with TDD
 
-A step by step series of examples that tell you how to get a development env running
+I hadn't used testing frameworks very much before this assignment, as I found the experience to be clunky with the languages I was using.
+Usually, I would test by running the code, using a debugger, putting print statements in the code, and so on.
+However, the experience of testing code in Rust is very pleasant, and it is helped by Rust's type system and borrow checker.
+Since Rust prohibits many types of errors that would be a testing concern in many other languages (dereferencing null pointers, incorrect types, memory issues, etc),
+I was able to focus almost solely on testing for logic errors. Being able to run all the tests using Cargo and do everything in the CLI was also pleasant.
+I now see that there's a definite advantage to TDD. It is less haphazard than keeping a bunch of edge cases in my head and running them from input repeatedly.
+For personal projects, I'm now convinced that I should use tests very early on, but I'm not convinced that purely dogmatic TDD (always write a failing test first) is always necessary.
 
-Say what the step will be
-
-```
-Give the example
-```
-
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
+### Naming And Organization
