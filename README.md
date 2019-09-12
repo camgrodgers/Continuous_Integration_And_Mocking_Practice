@@ -125,4 +125,11 @@ For general naming conventions, I followed the Rust guidelines:
 
 https://rust-lang-nursery.github.io/api-guidelines/naming.html
 
+### Videos
+Here's the video of the Red, Green, Refactor process:
 
+https://github.com/camgrodgers/Test_Driven_Practice_1/raw/master/RGR_cameron_rodgers.mp4
+
+Here's the video of all the functions running:
+
+https://github.com/camgrodgers/Test_Driven_Practice_1/raw/master/demo_cameron_rodgers.mp4
