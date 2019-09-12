@@ -61,9 +61,23 @@ test email_accepts_valid ... ok
 
 test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
 ```
-There is 100% test coverage on all of the functions except for (possibly) the email validator, as all code paths are covered.
-The email validator is covered on both "code paths," but the regex portion of the function would require much more intensive testing for full coverage.
-I was unable to find and install a suitable code coverage tester for Rust at this time.
+I used cargo-tarpaulin to test code coverage of the functions and their tests (leaving out main).
+
+https://crates.io/crates/cargo-tarpaulin
+
+It says that the code has 91.87% coverage.
+```
+running 15 tests
+...............
+test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+
+[INFO tarpaulin] Coverage Results:
+|| Tested/Total Lines:
+|| src/main.rs: 68/74
+|| 
+91.89% coverage, 68/74 lines covered
+```
+I am not sure if it's possible to get per-function coverage ratings with tarpaulin, and overall I think that code coverage tools in Rust are lacking at the moment.
 
 #### My Experience with TDD
 

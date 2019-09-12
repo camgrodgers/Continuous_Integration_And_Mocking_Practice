@@ -8,6 +8,7 @@ use clap::{App, Arg};
 use std::io::{self};
 use std::str::FromStr;
 
+#[cfg_attr(tarpaulin, skip)]
 fn main() {
     let matches = App::new("TDD_Practice")
         .arg(Arg::with_name("bodymass")
