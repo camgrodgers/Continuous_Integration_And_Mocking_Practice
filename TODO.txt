@@ -5,7 +5,6 @@ Code:
 Report:
 	- as README.md file
 	- discuss naming and organization conventions
-	- setup/installation and execution instructions
 	- screenshot/copypaste test suite results
 	- report test coverage level
 	- describe experience with TDD
