@@ -3,6 +3,7 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                sh 'rustup default stable'
                 sh 'cargo build --release'
             }
         }
