@@ -1,9 +1,10 @@
 use regex::Regex;
 use assert_approx_eq::*;
+use serde::{Serialize, Deserialize};
 
 
 // Shortest Distance
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy, Serialize, Deserialize)]
 pub struct Point {
     pub x: f64,
     pub y: f64,

@@ -1,16 +1,22 @@
 mod calc;
 
+extern crate actix_web;
 extern crate assert_approx_eq;
 extern crate clap;
 extern crate postgres;
 extern crate regex;
 
+use actix_web::{web, App as ActixApp, HttpRequest, HttpServer, Responder};
 use clap::{App, Arg};
 use postgres::{Connection, TlsMode};
+use serde::{Serialize, Deserialize};
+use serde_json::{Result, Value};
 use std::io::{self};
 use std::str::FromStr;
+use std::sync::Mutex;
 
 
+// TODO: could just use generics as a hacky fix?
 trait Store {
     fn new() -> Self;
     fn get_emails(&self) -> Vec<(String, bool)>;
@@ -85,25 +91,79 @@ impl Store for RealStore {
     }
 }
 
+fn get_emails(db: web::Data<Mutex<RealStore>>) -> impl Responder {
+    let db = db.lock().unwrap();
+    web::Json(db.get_emails())
+}
+
+fn get_distances(db: web::Data<Mutex<RealStore>>) -> impl Responder {
+    let db = db.lock().unwrap();
+    //serde_json::to_string(&db.get_distances());
+    web::Json(db.get_distances())
+}
+
+// NOTE: json format for this is like [{"x":0.0,"y":0.0},{"x":1.0,"y":10.0}]
+fn distance(db: web::Data<Mutex<RealStore>>,
+            points: web::Json<(calc::Point, calc::Point)>)
+            -> impl Responder {
+    let mut db = db.lock().unwrap();
+    let (p1, p2) = points.into_inner();
+    let dist = calc::calc_shortest_distance(p1.clone(), p2.clone());
+    db.insert_distance(p1, p2, dist);
+    web::Json(dist)
+}
+
+fn email(db: web::Data<Mutex<RealStore>>,
+            email: web::Json<String>)
+            -> impl Responder {
+    let mut db = db.lock().unwrap();
+    let email = email.into_inner();
+    let valid = calc::email_is_valid(email.clone());
+    db.insert_email(email, valid);
+    web::Json(valid)
+}
+
 #[cfg_attr(tarpaulin, skip)]
 fn main() {
     let matches = App::new("TDD_Practice")
         .arg(Arg::with_name("distance")
              .long("distance")
+             .short("d")
              .takes_value(false)
              .help("Run the distance input/calculation routine"))
         .arg(Arg::with_name("email")
              .long("email")
+             .short("e")
              .takes_value(false)
              .help("Run the email checking routine"))
         .arg(Arg::with_name("serve")
              .long("serve")
+             .short("s")
              .takes_value(false)
              .help("Run the web server"))
         .get_matches();
 
     let mut s: RealStore = Store::new();
 
+    if matches.is_present("serve") {
+        let s = web::Data::new(Mutex::new(s));
+        HttpServer::new(move || {
+            ActixApp::new()
+                .register_data(s.clone())
+                .route("/api/emails", web::get().to(get_emails))
+                .route("/api/email", web::post().to(email))
+                .route("/api/distances", web::get().to(get_distances))
+                .route("/api/distance", web::post().to(distance))
+            })
+            .bind("localhost:5000")
+            .expect("Can not bind to port 5000")
+            .run()
+            .unwrap();
+
+        return;
+    }
+
+    // TODO: breakout into functions
     if matches.is_present("distance") {
         for (p1, p2, d) in s.get_distances() {
             println!("point 1: {:?}, point 2: {:?}, distance: {}", p1, p2, d);
