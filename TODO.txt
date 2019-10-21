@@ -1,7 +1,12 @@
 Code:
-	- if time's available, try out property testing
+- code for starting docker in the jenkinsfile?
+- code for creating the postgres db in jenkins or what?
+- test doubles (mocks, fakes, spies, dummies) for the Store trait
+	- four per function, at least one stub and one mock
+
 
 Report:
 
 Screencasts:
+- three left, one for each stage
 
