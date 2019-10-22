@@ -17,6 +17,11 @@ pipeline {
                 sh 'cargo test mock'
             }
         }
+        stage('HttpTest') {
+            steps {
+                sh 'cargo test http'
+            }
+        }
 	}
 }
 

@@ -4,11 +4,14 @@ Code:
 - test doubles (mocks, fakes, spies, dummies) for the Store trait
 	- four per function, at least one stub and one mock
 - using a rust docker image in jenkins? 
+- deploy/run phase?
 
 
 Report:
 - edit and update report
+	- instructions on setup
+	- 
 
 Screencasts:
-- three left, one for each stage
+- two left, one for each stage
 

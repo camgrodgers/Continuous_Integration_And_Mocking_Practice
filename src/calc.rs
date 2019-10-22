@@ -108,6 +108,7 @@ fn mock_stub_email() {
 }
 
 pub fn email_is_valid(email: String) -> bool {
+    let email = String::from(email.trim());
     Regex::new(
         r"^[^\d\.][\w\d\.!${+%*-=?^_}|]+\w@[\w\.]+\.\w{1,4}$"
         ).unwrap().is_match(&email)

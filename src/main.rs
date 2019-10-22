@@ -4,6 +4,7 @@ mod store;
 use store::*;
 
 extern crate actix_files;
+extern crate actix_http_test;
 extern crate actix_web;
 extern crate assert_approx_eq;
 extern crate clap;
@@ -12,6 +13,9 @@ extern crate regex;
 
 use actix_files::*;
 use actix_web::{web, App as ActixApp, HttpServer, Responder};
+use actix_http::HttpService;
+use actix_http_test::TestServer;
+
 use clap::{App, Arg};
 use std::io::{self};
 use std::str::FromStr;
@@ -24,10 +28,47 @@ fn get_emails(db: web::Data<Mutex<store::RealStore>>) -> impl Responder {
     web::Json(db.get_emails())
 }
 
+#[test]
+fn http_returns_emails() {
+    let mut s: store::RealStore = store::Store::new();
+    let s = web::Data::new(Mutex::new(s));
+    let mut srv = TestServer::new( move || {
+        HttpService::new(
+            ActixApp::new()
+                .register_data(s.clone())
+                .route("/api/emails", web::get().to(get_emails))
+        )});
+
+    let req = srv.get("/api/emails");
+    let mut response = srv.block_on(req.send()).unwrap();
+    assert!(response.status().is_success());
+    let bytes = srv.block_on(response.body()).unwrap();
+    let body = std::str::from_utf8(&bytes).unwrap();
+    let v: Vec<(String, bool)> = serde_json::from_str(body).unwrap();
+}
+
 fn get_distances(db: web::Data<Mutex<store::RealStore>>) -> impl Responder {
     let db = db.lock().unwrap();
-    //serde_json::to_string(&db.get_distances());
     web::Json(db.get_distances())
+}
+
+#[test]
+fn http_returns_distances() {
+    let mut s: store::RealStore = store::Store::new();
+    let s = web::Data::new(Mutex::new(s));
+    let mut srv = TestServer::new( move || {
+        HttpService::new(
+            ActixApp::new()
+                .register_data(s.clone())
+                .route("/api/distances", web::get().to(get_distances))
+        )});
+
+    let req = srv.get("/api/distances");
+    let mut response = srv.block_on(req.send()).unwrap();
+    assert!(response.status().is_success());
+    let bytes = srv.block_on(response.body()).unwrap();
+    let body = std::str::from_utf8(&bytes).unwrap();
+    let v: Vec<(calc::Point, calc::Point, f64)> = serde_json::from_str(body).unwrap();
 }
 
 // NOTE: json format for this is like [{"x":0.0,"y":0.0},{"x":1.0,"y":10.0}]
@@ -63,6 +104,8 @@ fn serve(s: store::RealStore) {
         .run()
         .unwrap();
 }
+
+
 
 #[cfg_attr(tarpaulin, skip)]
 fn main() {
