@@ -7,9 +7,14 @@ pipeline {
                 sh 'cargo build --release'
             }
         }
-        stage('Test') {
+        stage('UnitTest') {
             steps {
-                sh 'cargo test --release'
+                sh 'cargo test unit'
+            }
+        }
+        stage('DummyTest') {
+            steps {
+                sh 'cargo test mock'
             }
         }
 	}
