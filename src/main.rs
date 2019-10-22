@@ -11,7 +11,6 @@ extern crate clap;
 extern crate postgres;
 extern crate regex;
 
-use actix_files::*;
 use actix_web::{web, App as ActixApp, HttpServer, Responder};
 use actix_http::HttpService;
 use actix_http_test::TestServer;
@@ -30,7 +29,7 @@ fn get_emails(db: web::Data<Mutex<store::RealStore>>) -> impl Responder {
 
 #[test]
 fn http_returns_emails() {
-    let mut s: store::RealStore = store::Store::new();
+    let s: store::RealStore = store::Store::new();
     let s = web::Data::new(Mutex::new(s));
     let mut srv = TestServer::new( move || {
         HttpService::new(
@@ -44,7 +43,27 @@ fn http_returns_emails() {
     assert!(response.status().is_success());
     let bytes = srv.block_on(response.body()).unwrap();
     let body = std::str::from_utf8(&bytes).unwrap();
-    let v: Vec<(String, bool)> = serde_json::from_str(body).unwrap();
+    let _v: Vec<(String, bool)> = serde_json::from_str(body).unwrap();
+}
+
+#[test]
+fn http_validates_email() {
+    let s: store::RealStore = store::Store::new();
+    let s = web::Data::new(Mutex::new(s));
+    let mut srv = TestServer::new( move || {
+        HttpService::new(
+            ActixApp::new()
+                .register_data(s.clone())
+                .route("/api/email", web::post().to(email))
+        )});
+
+    let req = srv.post("/api/email");
+    let mut response = srv.block_on(req.send_json(&String::from("asdf"))).unwrap();
+    assert!(response.status().is_success());
+    let bytes = srv.block_on(response.body()).unwrap();
+    let body = std::str::from_utf8(&bytes).unwrap();
+    let valid: bool = serde_json::from_str(body).unwrap();
+    assert_eq!(valid, false);
 }
 
 fn get_distances(db: web::Data<Mutex<store::RealStore>>) -> impl Responder {
@@ -54,7 +73,7 @@ fn get_distances(db: web::Data<Mutex<store::RealStore>>) -> impl Responder {
 
 #[test]
 fn http_returns_distances() {
-    let mut s: store::RealStore = store::Store::new();
+    let s: store::RealStore = store::Store::new();
     let s = web::Data::new(Mutex::new(s));
     let mut srv = TestServer::new( move || {
         HttpService::new(
@@ -68,7 +87,27 @@ fn http_returns_distances() {
     assert!(response.status().is_success());
     let bytes = srv.block_on(response.body()).unwrap();
     let body = std::str::from_utf8(&bytes).unwrap();
-    let v: Vec<(calc::Point, calc::Point, f64)> = serde_json::from_str(body).unwrap();
+    let _v: Vec<(calc::Point, calc::Point, f64)> = serde_json::from_str(body).unwrap();
+}
+
+#[test]
+fn http_calculates_distance() {
+    let s: store::RealStore = store::Store::new();
+    let s = web::Data::new(Mutex::new(s));
+    let mut srv = TestServer::new( move || {
+        HttpService::new(
+            ActixApp::new()
+                .register_data(s.clone())
+                .route("/api/distance", web::post().to(distance))
+        )});
+
+    let req = srv.post("/api/distance");
+    let message = (calc::Point{x: 0.0, y: 5.0}, calc::Point{x: 10.0, y: 10.0});
+    let mut response = srv.block_on(req.send_json(&message)).unwrap();
+    assert!(response.status().is_success());
+    let bytes = srv.block_on(response.body()).unwrap();
+    let body = std::str::from_utf8(&bytes).unwrap();
+    let _distance: f64 = serde_json::from_str(body).unwrap();
 }
 
 // NOTE: json format for this is like [{"x":0.0,"y":0.0},{"x":1.0,"y":10.0}]
