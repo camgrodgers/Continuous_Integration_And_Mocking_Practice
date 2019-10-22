@@ -46,25 +46,6 @@ fn http_returns_emails() {
     let _v: Vec<(String, bool)> = serde_json::from_str(body).unwrap();
 }
 
-#[test]
-fn http_validates_email() {
-    let s: store::RealStore = store::Store::new();
-    let s = web::Data::new(Mutex::new(s));
-    let mut srv = TestServer::new( move || {
-        HttpService::new(
-            ActixApp::new()
-                .register_data(s.clone())
-                .route("/api/email", web::post().to(email))
-        )});
-
-    let req = srv.post("/api/email");
-    let mut response = srv.block_on(req.send_json(&String::from("asdf"))).unwrap();
-    assert!(response.status().is_success());
-    let bytes = srv.block_on(response.body()).unwrap();
-    let body = std::str::from_utf8(&bytes).unwrap();
-    let valid: bool = serde_json::from_str(body).unwrap();
-    assert_eq!(valid, false);
-}
 
 fn get_distances(db: web::Data<Mutex<store::RealStore>>) -> impl Responder {
     let db = db.lock().unwrap();
@@ -90,6 +71,16 @@ fn http_returns_distances() {
     let _v: Vec<(calc::Point, calc::Point, f64)> = serde_json::from_str(body).unwrap();
 }
 
+
+// NOTE: json format for this is like [{"x":0.0,"y":0.0},{"x":1.0,"y":10.0}]
+fn distance(db: web::Data<Mutex<store::RealStore>>,
+            points: web::Json<(calc::Point, calc::Point)>)
+            -> impl Responder {
+    let mut db = db.lock().unwrap();
+    let (p1, p2) = points.into_inner();
+    web::Json(calc::calc_shortest_distance_store(p1, p2, &mut *db))
+}
+
 #[test]
 fn http_calculates_distance() {
     let s: store::RealStore = store::Store::new();
@@ -110,21 +101,33 @@ fn http_calculates_distance() {
     let _distance: f64 = serde_json::from_str(body).unwrap();
 }
 
-// NOTE: json format for this is like [{"x":0.0,"y":0.0},{"x":1.0,"y":10.0}]
-fn distance(db: web::Data<Mutex<store::RealStore>>,
-            points: web::Json<(calc::Point, calc::Point)>)
-            -> impl Responder {
-    let mut db = db.lock().unwrap();
-    let (p1, p2) = points.into_inner();
-    web::Json(calc::calc_shortest_distance_store(p1, p2, &mut *db))
-}
-
+// Emails are sent in format with quotes like "annie@yodelehi.hoo"
 fn email(db: web::Data<Mutex<store::RealStore>>,
             email: web::Json<String>)
             -> impl Responder {
     let mut db = db.lock().unwrap();
     let email = email.into_inner();
     web::Json(calc::email_is_valid_store(email, &mut *db))
+}
+
+#[test]
+fn http_validates_email() {
+    let s: store::RealStore = store::Store::new();
+    let s = web::Data::new(Mutex::new(s));
+    let mut srv = TestServer::new( move || {
+        HttpService::new(
+            ActixApp::new()
+                .register_data(s.clone())
+                .route("/api/email", web::post().to(email))
+        )});
+
+    let req = srv.post("/api/email");
+    let mut response = srv.block_on(req.send_json(&String::from("asdf"))).unwrap();
+    assert!(response.status().is_success());
+    let bytes = srv.block_on(response.body()).unwrap();
+    let body = std::str::from_utf8(&bytes).unwrap();
+    let valid: bool = serde_json::from_str(body).unwrap();
+    assert_eq!(valid, false);
 }
 
 fn serve(s: store::RealStore) {

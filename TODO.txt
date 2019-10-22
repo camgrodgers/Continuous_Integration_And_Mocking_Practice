@@ -1,8 +1,6 @@
 Code:
 - code for starting postgres docker in the jenkinsfile?
 - code for creating the postgres db in jenkins or what?
-- test doubles (mocks, fakes, spies, dummies) for the Store trait
-	- four per function, at least one stub and one mock
 - using a rust docker image in jenkins? 
 - deploy/run phase?
 
@@ -13,5 +11,5 @@ Report:
 	- 
 
 Screencasts:
-- two left, one for each stage
+- one left final overview
 
