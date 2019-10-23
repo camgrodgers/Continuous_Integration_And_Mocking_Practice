@@ -7,7 +7,9 @@ Rust is not a language that easily accomidates usage of test doubles.
 Its type system is very strict compared to dynamic languages, and as a result, I needed to wrap the database in a Trait struct (like an interface) that managed the db connection.
 However, even using traits, there are a number of pitfalls involving the choice Rust gives of either using dynamic dispatch (dyn Trait objects) or the preferred method, bounded generics (impl Trait).
 While I was able to get the test double working for the database tests using impl Trait, I was unable to navigate the complexities of the type system when it came to using a test double in the web server itself.
-In order to make all tests pass (specifically, the http tests), you will need to get the postgres docker image running. This process is described below in the Installation section.
+In order to make all tests pass (specifically, the http tests), you will need to get the postgres docker image running. That process is described below in the Installation section.
+
+As a side note, I used the server test capabilities provided by Actix to include the http tests as part of the code. 
 
 ### API
 The running server has four url paths.
