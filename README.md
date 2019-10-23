@@ -15,7 +15,7 @@ https://www.rust-lang.org/tools/install
 This code was tested on a Linux machine, so while it should work on Windows, for best results, use Linux.
 Get this code by cloning this git repo.
 ```
-git clone https://github.com/camgrodgers/Test_Driven_Practice_1.git
+git clone https://github.com/camgrodgers/ppa2.git
 ```
 Then enter the directory and use Cargo (Rust's package manager and build system) to compile and run.
 ```
@@ -28,17 +28,20 @@ The help flag will print out a list of options for the program:
 TDD_Practice
 
 USAGE:
-    Test_Driven_Practice_1 [FLAGS]
+    PPA2 [FLAGS]
 
 FLAGS:
-        --bodymass      Run the BMI input/calculation routine
-        --distance      Run the distance input/calculation routine
-        --email         Run the email checking routine
-    -h, --help          Prints help information
-        --retirement    Run the retirement savings routine
-    -V, --version       Prints version information
+    -d, --distance    Run the distance input/calculation routine
+    -e, --email       Run the email checking routine
+    -h, --help        Prints help information
+    -s, --serve       Run the web server
+    -V, --version     Prints version information
 ```
+All of the routines depend on a running instance of the postgresql database.
+The server flag --serve will prevent the other flags from running, and will start the server.
 Use any combination of custom flags to run the various routines. The program will prompt for input.
+
+### 
 
 #### My Experience with CI and Test Doubles
 

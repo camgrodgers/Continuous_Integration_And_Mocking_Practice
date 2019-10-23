@@ -1,8 +1,5 @@
 pipeline {
-	agent {
-        docker { image 'rust' }
-    }
-
+	agent any
     stages {
         stage('Build') {
             steps {
