@@ -29,6 +29,17 @@ http://localhost:5000/api/distance
 ```
 
 ### Videos
+Phase 1:
+https://raw.githubusercontent.com/camgrodgers/ppa2/master/phase1.mp4
+
+Phase 2:
+https://raw.githubusercontent.com/camgrodgers/ppa2/master/phase2.mp4
+
+Phase 3:
+https://raw.githubusercontent.com/camgrodgers/ppa2/master/phase3.mp4
+
+Phase 4 (download this one and play it in your video player):
+https://raw.githubusercontent.com/camgrodgers/ppa2/master/phase4.mp4
 
 ### How To Install And Compile
 
